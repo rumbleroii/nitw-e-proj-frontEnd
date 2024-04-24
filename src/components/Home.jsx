@@ -7,16 +7,18 @@ import Generate from './Generate';
     const { param } = useParams();
     const fileInputRef = useRef(null);
     const [loading, setLoading] = useState(false);
+    const [count, setCount] = useState('');
 
     useEffect(() => {
       const fetchData = async () => {
         if (!param) return;
-        
+
         try {
           console.log(param)
           setLoading(true);
-          const response = await axios.get(`https://api.example.com/${param}}`);
+          const response = await axios.get(`https://us-central1-votinggovt.cloudfunctions.net/generate?uuid=${param}`);
           console.log('Fetched data:', response.data);
+          setCount(response.data.count)
         } catch (error) {
           console.error('Error fetching data:', error);
         } finally {
@@ -44,7 +46,7 @@ import Generate from './Generate';
         <div style={{ backgroundColor: 'gray', padding: '40px', borderRadius: '8px' }}>
           <p style={{ fontSize: '20px', fontWeight: 'bold' }}>Person who has sent you this</p>
           <p style={{ fontSize: '18px', marginBottom: '10px' }}>has made a change by sharing it with</p>
-          <p style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '20px' }}>6 People</p>
+          <p style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '20px' }}>{count} People</p>
           <p style={{ fontSize: '18px', marginBottom: '30px' }}>and they believe you can too, Create the change, Start by</p>
           <input
             type="file"
@@ -68,6 +70,7 @@ import Generate from './Generate';
   };
 
   const Home = () => {
+    const { param } = useParams();
     const [file, setFile] = useState(null);
     const handleFileUpload = (uploadedFile) => {
       setFile(uploadedFile); // Set the uploaded file
@@ -75,7 +78,7 @@ import Generate from './Generate';
 
     return (
       <>
-        {file ? <Generate file={file} /> : <App onFileUpload={handleFileUpload} />}
+        {file ? <Generate file={file} uuid={param} /> : <App onFileUpload={handleFileUpload} />}
       </>
     );
   };

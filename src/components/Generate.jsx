@@ -1,9 +1,10 @@
+import axios from 'axios';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const Generate = ({ file }) => {
+const Generate = ({ file , uuid }) => {
   const navigate = useNavigate();
-
+  
   // List of prompts
   const prompts = [
     "I wield the power. Cast your vote!",
@@ -29,7 +30,7 @@ const Generate = ({ file }) => {
   ];
 
   // State to store the current prompt and loading status
-  const [currentPrompt, setCurrentPrompt] = useState(prompts[0]);
+  const [currentPrompt, setCurrentPrompt] = useState(prompts[Math.floor(Math.random() * prompts.length)]);
   const [loading, setLoading] = useState(false);
 
   // Function to handle changing the prompt
@@ -43,7 +44,11 @@ const Generate = ({ file }) => {
   };
 
   // Function to handle navigation
-  const handleClick = () => {
+  const handleClick = async () => {
+    console.log(uuid)
+    const response = await axios.patch(`https://us-central1-votinggovt.cloudfunctions.net/update?uuid=${uuid}`)
+    console.log('Counter Updated');
+
     navigate('/result');
   };
 
