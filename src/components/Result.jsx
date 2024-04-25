@@ -1,27 +1,26 @@
 import axios from 'axios';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
+import { useLocation } from 'react-router-dom';
 
 const Result = () => {
+  const location = useLocation();
   const [uuid, setUuid] = useState();
   const [shareUrl, setShareUrl] = useState('');
-
-  useEffect(() => {
-    // Fetch UUID using Axios
-    const fetchUuid = async () => {
-      try {
-        const response = await axios.post('https://us-central1-votinggovt.cloudfunctions.net/generateNumber');
-        console.log(response.data.number);
-        setUuid(response.data.number);
-      } catch (error) {
-        console.error('Error fetching UUID:', error);
-      }
-    };
-    fetchUuid();
-  }, []);
+  const [imageData, setImageData] = useState(null); // State to store image data
 
   const handleShare = async () => {
+    try {
+      const response = await axios.post('https://us-central1-votinggovt.cloudfunctions.net/generateNumber');
+      console.log(response.data.number);
+      setUuid(response.data.number);
+    } catch (error) {
+      console.error('Error fetching UUID:', error);
+    }
+
+    // Construct share text with UUID
     const shareText = `\n\nUUID: ${uuid}\n\nShare this image, UUID, and text on WhatsApp!`;
 
+    // Share content if browser supports Web Share API, otherwise open WhatsApp directly
     if (navigator.share) {
       try {
         await navigator.share({
@@ -41,19 +40,19 @@ const Result = () => {
     }
   };
 
+  // Extract image data from location state when component mounts
+  React.useEffect(() => {
+    if (location.state && location.state.resultData) {
+      setImageData(location.state.resultData.maskedImage);
+    }
+  }, [location.state]);
+
   return (
     <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       <h2 style={{ marginBottom: '20px' }}>Initiative By Collectorate Office, Hanmakonda</h2>
       <div style={{ position: 'relative', marginBottom: '30px' }}>
-        <div
-          style={{
-            width: '200px',
-            height: '200px',
-            borderRadius: '50%',
-            backgroundColor: 'gray',
-            position: 'relative',
-          }}
-        ></div>
+        {/* Render image if imageData exists */}
+        {imageData && <img src={imageData} alt="Uploaded" style={{ width: '200px', height: '200px', borderRadius: '50%' }} />}
       </div>
       <div style={{ marginBottom: '30px' }}>
         <button onClick={handleShare} style={{ padding: '10px 20px', fontSize: '16px' }}>
