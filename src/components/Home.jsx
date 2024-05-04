@@ -1,26 +1,33 @@
 import axios from 'axios';
+import imageCompression from 'browser-image-compression';
 import React, { useEffect, useRef, useState } from 'react';
 import CountUp from 'react-countup';
 import { useParams } from 'react-router-dom';
 
 import ballot from '../assets/ballot.png';
 import sveepLogo from '../assets/sveep_logo.png';
+
 import Generate from './Generate';
 import styles from './Home.module.css';
 
+const options = {
+  maxSizeMB: 0.5,
+  useWebWorker: true,
+  maxIteration: 30,         
+  alwaysKeepResolution: true 
+}
+
 const App = ({ onFileUpload }) => {
-  const { param } = useParams();
   const fileInputRef = useRef(null);
   const [loading, setLoading] = useState(false);
   const [count, setCount] = useState('1');
 
   useEffect(() => {
     const fetchData = async () => {
-      if (!param) return;
       try {
         setLoading(true);
         const response = await axios.get(
-          `https://us-central1-votinggovt.cloudfunctions.net/generate?uuid=${param}`
+          `https://asia-south1-votinggovt.cloudfunctions.net/generate-1?uuid=105583`
         );
         console.log('Fetched data:', response.data);
         setCount(response.data.count);
@@ -38,10 +45,10 @@ const App = ({ onFileUpload }) => {
     fileInputRef.current.click();
   };
 
-  const handleFileChange = (event) => {
-    const file = event.target.files[0];
-    console.log('Uploaded file:', file);
-    onFileUpload(file); // Pass the uploaded file to the parent component
+  const handleFileChange = async (event) => {
+    const imageFile = event.target.files[0];
+    const compressedFile = await imageCompression(imageFile, options);
+    onFileUpload(compressedFile); // Pass the uploaded file to the parent component
   };
 
   return (
@@ -54,7 +61,7 @@ const App = ({ onFileUpload }) => {
             <div class={styles.nav}>
                 <img class={styles.navLogo} src={sveepLogo}></img>
                 <div class={styles.navTitle}>
-                  <p>Initiative by Collectorate Office, Hanumakonda</p>
+                  <p>Initiative by Distrct Collectors Office, Hanumakonda</p>
                 </div>
             </div>
             <div class={styles.containerMain}>
@@ -62,9 +69,9 @@ const App = ({ onFileUpload }) => {
                 <img src={ballot}/>
               </div>
               <div class={styles.headerNameDisplay}>
-                  <span class={styles.headerNameDisplayName}>Person who sent you this</span>
+                  <span class={styles.headerNameDisplayName}>You are the</span>
                   <div class={styles.headerNameDisplayRow}>
-                  <span>has </span>
+                  {/* <span>has </span> */}
                   <span class={styles.headerNameDisplayCount}>
                     <CountUp start={0} end={count} delay={0} duration={2.75}>
                       {({ countUpRef }) => (
@@ -74,15 +81,15 @@ const App = ({ onFileUpload }) => {
                       )}
                     </CountUp>
                   </span>
-                  <span>Shares!</span>
+                  <span class={styles.headerNameDisplayName}>Visitor!</span>
                   </div>
               </div>
 
               <div class={styles.headerMainButton}>
-                Start the change, make a differnce!. Start By
+                Contribute to the change, Make a difference on <br></br>13th May 2024!
                 <input
                   type="file"
-                  accept="image/*"
+                  accept="capture=camera,image/*"
                   ref={fileInputRef}
                   style={{ display: 'none' }}
                   onChange={handleFileChange}
@@ -92,19 +99,22 @@ const App = ({ onFileUpload }) => {
                 </button>
                 </div>
               </div>
-            <div class={styles.infoContainer}>
+            {/* <div class={styles.infoContainer}>
               <h3>Important Links</h3>
               <hr></hr>
                 <div class={styles.infoContainerLinks}>
                   <span>SVEEP Website: <a href='https://ecisveep.nic.in'>https://ecisveep.nic.in</a></span>
                   <span>Voters Helpline: <a href='tel: 1800-425-1816'>1800-425-1816</a></span>
                 </div>
-            </div>
-            <div className={styles.footer}>
-              <p>Developed By Students of NIT Warangal</p>
-            </div>
+            </div> */}
+            
           </div>
-          
+          <div className={styles.footer}>
+                <p><span style={{ color: "#FFD68E" }}>ECI Website:</span><a href='https://eci.gov.in'>eci.gov.in</a></p>
+                <p><span style={{ color: "#FFD68E" }}>Voters Helpline:</span><a href='tel: 1800-425-1816'>1800-425-1816</a></p>
+                <br></br>
+                <p>Developed By Students of NIT Warangal</p>
+            </div>
         </>
       )}    
     </>
@@ -116,7 +126,7 @@ const Home = () => {
   const [file, setFile] = useState(null);
 
   const handleFileUpload = (uploadedFile) => {
-    setFile(uploadedFile); // Set the uploaded file
+    setFile(uploadedFile);
   };
 
   return (
